@@ -1,14 +1,24 @@
-float progress = 0;
+// Tweakable Parameters
 float updateRate = 0.01;
-int currentIteration = 1;
 int maxIterations = 7;
-color c = color(0, 150, 150);
+color mainColor = color(0, 150, 150);
 
+// Global State Variables
+float progress = 0;
+int currentIteration = 1;
+boolean forward = true;
 
+// Initial triangle point positions
+PVector initialBottomLeft = new PVector(100, 450);
+PVector initialBottomRight = new PVector(500, 450);
+
+// Fonts
+PFont mainFont;
 
 void setup() {
   size(600, 620);
   background(0, 0, 50);
+  mainFont = createFont("Arial", 16, true);
 }
 
 void draw() {
@@ -19,45 +29,42 @@ void draw() {
   
   updateProgressAndIterations();
   
-  PVector left = new PVector(100, 450);
-  PVector right = new PVector(500, 450);
-  drawSnowflake(left, right, currentIteration, progress);
+  drawSnowflake(initialBottomLeft, initialBottomRight, currentIteration, progress);
 }
 
 void drawTitle() {
-  fill(c);
-  PFont titleFont = createFont("Arial", 16, true);
-  textFont(titleFont, 14);
+  fill(mainColor);
+  textFont(mainFont, 14);
   text("Iterations: " + currentIteration, width - 80, height - 10);
 }
 
 void drawIterationsLabel() {
-  fill(c);
-  PFont titleFont = createFont("Arial", 16, true);
-  textFont(titleFont, 22);
+  fill(mainColor);
+  textFont(mainFont, 22);
   text("Koch Snowflake", 10, 30);
 }
 
-boolean forward = true;
 void updateProgressAndIterations() {
   if (forward) {
-    if (progress >= 1.0) {
+    if (progress >= 1.0)
       forward = false;
-    } else {
+    else
       progress += updateRate;
-    }
   }
-  else {
+  else { // Going Backwards
     if (progress <= 0) {
-      currentIteration++;
-      if (currentIteration > maxIterations) {
-          currentIteration = 1;
-      }
+      bumpCurrentIteration();
       forward = true;
     } else {
      progress -= updateRate; 
     }
   }
+}
+
+void bumpCurrentIteration() {
+  currentIteration++;
+  if (currentIteration > maxIterations) 
+      currentIteration = 1;
 }
 
 void drawSnowflake(PVector left, PVector right, int iterations, float progress) {
@@ -68,21 +75,10 @@ void drawSnowflake(PVector left, PVector right, int iterations, float progress) 
   drawSegment(right, left, iterations, progress);
 }
 
-PVector getTrianglePoint(PVector left, PVector right, float progress) {
-  PVector rightLeft = new PVector(right.x - left.x, right.y - left.y);
-  PVector center = new PVector(rightLeft.x/2.0, rightLeft.y/2.0);
-  center.add(left);
-
-  rightLeft.mult(progress);
-  
-  PVector rotated = new PVector(rightLeft.y, -rightLeft.x);
-  rotated.add(center);
-  return rotated;
-}
 
 void drawSegment(PVector start, PVector end, int iterations, float progress) {
   if (iterations == 0) {
-    drawLine(start, end);
+    drawLine(start, end); // Base Case
   } else {
     float xLength = (end.x - start.x) / 3.0;
     float yLength = (end.y - start.y) / 3.0;
@@ -100,6 +96,18 @@ void drawSegment(PVector start, PVector end, int iterations, float progress) {
 
 
 void drawLine(PVector start, PVector end) {
-  stroke(c);
+  stroke(mainColor);
   line(start.x, start.y, end.x, end.y);
+}
+
+PVector getTrianglePoint(PVector left, PVector right, float progress) {
+  PVector rightLeft = new PVector(right.x - left.x, right.y - left.y);
+  PVector center = new PVector(rightLeft.x/2.0, rightLeft.y/2.0);
+  center.add(left);
+
+  rightLeft.mult(progress);
+  
+  PVector rotated = new PVector(rightLeft.y, -rightLeft.x);
+  rotated.add(center);
+  return rotated;
 }
